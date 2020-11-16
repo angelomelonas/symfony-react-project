@@ -39,6 +39,10 @@
 /app/phpunit.xml
 /phpunit.xml
 
+# Assets and user uploads
+/public/bundles/
+/public/uploads/
+
 # Build data
 /build/
 
@@ -50,6 +54,9 @@
 
 # Embedded web-server pid file
 /.web-server-pid
+
+/public
+/var
 
 # PHPStorm
 .idea
