@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -20,6 +21,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     }
  * )
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity("username")
+ * @UniqueEntity("email")
  */
 class User implements UserInterface
 {
@@ -47,6 +50,15 @@ class User implements UserInterface
      * )
      */
     private string $password;
+
+    /**
+     * @Assert\NotBlank()
+     * @Assert\Expression(
+     *     "this.getPassword() === this.getRetypedPassword()",
+     *     message="The passwords do not match."
+     * )
+     */
+    private $retypedPassword;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -180,5 +192,21 @@ class User implements UserInterface
     public function eraseCredentials()
     {
         // Not used.
+    }
+
+    /**
+     * @return string
+     */
+    public function getRetypedPassword(): ?string
+    {
+        return $this->retypedPassword;
+    }
+
+    /**
+     * @param string $retypedPassword
+     */
+    public function setRetypedPassword(string $retypedPassword): void
+    {
+        $this->retypedPassword = $retypedPassword;
     }
 }
