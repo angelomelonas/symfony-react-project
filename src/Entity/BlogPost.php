@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
- *     itemOperations={},
+ *     itemOperations={"get"},
  *     collectionOperations={"get"},
  * )
  * @ORM\Entity(repositoryClass=BlogPostRepository::class)
