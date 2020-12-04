@@ -18,7 +18,6 @@ class PasswordHashSubscriber implements EventSubscriberInterface
     private UserPasswordEncoderInterface $passwordEncoder;
 
     /**
-     * PasswordHashSubscriber constructor.
      * @param UserPasswordEncoderInterface $passwordEncoder
      */
     public function __construct(UserPasswordEncoderInterface $passwordEncoder)
