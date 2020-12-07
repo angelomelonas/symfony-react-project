@@ -7,11 +7,22 @@ use App\Repository\CommentRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource(
- *     itemOperations={"get"},
- *     collectionOperations={"get"}
- * )
  * @ORM\Entity(repositoryClass=CommentRepository::class)
+ *
+ * @ApiResource(
+ *     itemOperations={
+ *      "get",
+ *      "put"={
+ *              "security"="is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user"
+ *       }
+ *     },
+ *     collectionOperations={
+ *          "get",
+ *          "post"={
+ *              "security"="is_granted('IS_AUTHENTICATED_FULLY')"
+ *           }
+ *      }
+ * )
  */
 class Comment
 {
