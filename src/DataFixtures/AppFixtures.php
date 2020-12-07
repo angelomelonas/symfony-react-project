@@ -72,7 +72,7 @@ class AppFixtures extends Fixture
     public function loadUsers(ObjectManager $manager)
     {
         $user = new User();
-        $user->setUsername('Admin');
+        $user->setUsername('admin');
         $user->setEmail('admin@blogpostcom');
         $user->setName('Angelo Melonas');
         $user->setPassword($this->userPasswordEncoder->encodePassword(
@@ -81,6 +81,19 @@ class AppFixtures extends Fixture
         ));
 
         $this->addReference('user_admin', $user);
+
+        $manager->persist($user);
+
+        $user = new User();
+        $user->setUsername('angelo');
+        $user->setEmail('angelo@blogpostcom');
+        $user->setName('Angelo Melonas');
+        $user->setPassword($this->userPasswordEncoder->encodePassword(
+            $user,
+            'guest'
+        ));
+
+        $this->addReference('user_angelo', $user);
 
         $manager->persist($user);
         $manager->flush();
