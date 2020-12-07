@@ -18,12 +18,30 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ApiResource(
  *     itemOperations={
  *          "get"={
-                "access_control"="is_granted('IS_AUTHENTICATED_FULLY')"
+ *             "security"="is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "normalization_context"={
+ *                 "groups"={"get"}
+ *             }
+ *          },
+ *          "put"={
+ *              "security"="is_granted('IS_AUTHENTICATED_FULLY') and object == user",
+ *              "denormalization_context"={
+ *                  "groups"={"put"}
+ *              },
+ *              "normalization_context"={
+ *                  "groups"={"get"}
+ *              }
  *          }
- *      },
- *     collectionOperations={"post"},
- *     normalizationContext={
- *          "groups"={"read"}
+ *     },
+ *     collectionOperations={
+ *          "post"={
+ *              "denormalization_context"={
+ *                  "groups"={"post"}
+ *              },
+ *              "normalization_context"={
+ *                  "groups"={"get"}
+ *              }
+ *          }
  *     }
  * )
  *
@@ -36,61 +54,79 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"read"})
+     *
+     * @Groups({"get"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
-     * @Assert\Length(min=6, max=255)
+     *
+     * @Groups({"get", "post"})
+     *
+     * @Assert\NotBlank(groups={"post"})
+     * @Assert\Length(min=6, max=255, groups={"post"})
      */
     private string $username;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
+     *
+     * @Groups({"put", "post"})
+     *
+     * @Assert\NotBlank(groups={"post"})
      * @Assert\Regex(
      *     pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{7,}/",
-     *     message="Password does not meet minimum requirements. These requirements will have to be guessed though."
+     *     message="Password does not meet minimum requirements. These requirements will have to be guessed though.",
+     *     groups={"post"}
      * )
      */
     private string $password;
 
     /**
-     * @Assert\NotBlank()
+     * @Groups({"put", "post"})
+     *
+     * @Assert\NotBlank(groups={"post"})
      * @Assert\Expression(
      *     "this.getPassword() === this.getRetypedPassword()",
-     *     message="The passwords do not match."
+     *     message="The passwords do not match.",
+     *     groups={"post"}
      * )
      */
     private $retypedPassword;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"read"})
+     *
+     * @Groups({"get", "put", "post"})
+     *
      * @Assert\NotBlank()
-     * @Assert\Length(min=3, max=255)
+     * @Assert\Length(min=5, max=255)
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
-     * @Assert\Email()
-     * @Assert\Length(min=6, max=255)
+     *
+     * @Groups({"put", "post"})
+     *
+     * @Assert\NotBlank(groups={"post"})
+     * @Assert\Email(groups={"post", "put"})
+     * @Assert\Length(min=6, max=255, groups={"post", "put"})
      */
     private string $email;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\BlogPost", mappedBy="author")
-     * @Groups({"read"})
+     *
+     * @Groups({"get"})
      */
     private $posts;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="author")
-     * @Groups({"read"})
+     *
+     * @Groups({"get"})
      */
     private $comments;
 
