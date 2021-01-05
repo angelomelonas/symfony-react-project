@@ -57,12 +57,12 @@ class User implements UserInterface
      *
      * @Groups({"get"})
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      *
-     * @Groups({"get", "post"})
+     * @Groups({"get", "post", "get-comment-with-author", "get-blog-post-with-author"})
      *
      * @Assert\NotBlank(groups={"post"})
      * @Assert\Length(min=6, max=255, groups={"post"})
@@ -93,12 +93,12 @@ class User implements UserInterface
      *     groups={"post"}
      * )
      */
-    private $retypedPassword;
+    private string $retypedPassword;
 
     /**
      * @ORM\Column(type="string", length=255)
      *
-     * @Groups({"get", "put", "post"})
+     * @Groups({"get", "put", "post", "get-comment-with-author"})
      *
      * @Assert\NotBlank()
      * @Assert\Length(min=5, max=255)
@@ -121,14 +121,14 @@ class User implements UserInterface
      *
      * @Groups({"get"})
      */
-    private $posts;
+    private Collection $posts;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="author")
      *
      * @Groups({"get"})
      */
-    private $comments;
+    private Collection $comments;
 
     public function __construct()
     {
@@ -189,39 +189,27 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @return Collection
-     */
     public function getPosts(): Collection
     {
         return $this->posts;
     }
 
-    /**
-     * @param Collection $posts
-     */
     public function setPosts(Collection $posts): void
     {
         $this->posts = $posts;
     }
 
-    /**
-     * @return Collection
-     */
     public function getComments(): Collection
     {
         return $this->comments;
     }
 
-    /**
-     * @param Collection $comments
-     */
     public function setComments(Collection $comments): void
     {
         $this->comments = $comments;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         return ['ROLE_USER'];
     }
@@ -236,17 +224,11 @@ class User implements UserInterface
         // Not used.
     }
 
-    /**
-     * @return string
-     */
     public function getRetypedPassword(): ?string
     {
         return $this->retypedPassword;
     }
 
-    /**
-     * @param string $retypedPassword
-     */
     public function setRetypedPassword(string $retypedPassword): void
     {
         $this->retypedPassword = $retypedPassword;
