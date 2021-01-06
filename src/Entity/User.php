@@ -9,8 +9,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Validator\Constraints\UserPassword;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Controller\ResetPasswordAction;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -30,6 +32,15 @@ use Symfony\Component\Validator\Constraints as Assert;
  *              },
  *              "normalization_context"={
  *                  "groups"={"get"}
+ *              }
+ *          },
+ *          "put-reset-password"={
+ *              "security"="is_granted('IS_AUTHENTICATED_FULLY') and object == user",
+ *              "method"="PUT",
+ *              "path"="/users/{id}/reset-password",
+ *              "controller"=ResetPasswordAction::class,
+ *              "denormalization_context"={
+ *                  "groups"={"put-reset-password "}
  *              }
  *          }
  *     },
@@ -80,7 +91,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      *
-     * @Groups({"put", "post"})
+     * @Groups({"post"})
      *
      * @Assert\NotBlank(groups={"post"})
      * @Assert\Regex(
@@ -92,24 +103,62 @@ class User implements UserInterface
     private string $password;
 
     /**
-     * @Groups({"put", "post"})
+     * @Groups({"post"})
      *
      * @Assert\NotBlank(groups={"post"})
      * @Assert\Expression(
      *     "this.getPassword() === this.getRetypedPassword()",
      *     message="The passwords do not match.",
-     *     groups={"post"}
+     *     groups={"post" }
      * )
      */
     private string $retypedPassword;
+
+    /**
+     * @Groups({"put-reset-password"})
+     *
+     * @Assert\NotBlank(groups={"post"})
+     * @Assert\Regex(
+     *     pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{7,}/",
+     *     message="Password does not meet minimum requirements. These requirements will have to be guessed though.",
+     *     groups={"post"}
+     * )
+     */
+    private string $newPassword;
+
+    /**
+     * @Groups({"put-reset-password"})
+     *
+     * @Assert\NotBlank(groups={"post"})
+     * @Assert\Expression(
+     *     "this.getNewPassword() === this.getNewRetypedPassword()",
+     *     message="The passwords do not match.",
+     *     groups={"post"}
+     * )
+     */
+    private string $newRetypedPassword;
+
+    /**
+     * @Groups({"put-reset-password"})
+     *
+     * @UserPassword()
+     *
+     * @Assert\NotBlank()
+     */
+    private string $oldPassword;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private int $passwordChangeDate;
 
     /**
      * @ORM\Column(type="string", length=255)
      *
      * @Groups({"get", "put", "post", "get-comment-with-author"})
      *
-     * @Assert\NotBlank()
-     * @Assert\Length(min=5, max=255)
+     * @Assert\NotBlank(groups={"post"})
+     * @Assert\Length(min=5, max=255, groups={"post", "put" })
      */
     private string $name;
 
@@ -179,6 +228,36 @@ class User implements UserInterface
         $this->password = $password;
 
         return $this;
+    }
+
+    public function getNewPassword(): string
+    {
+        return $this->newPassword;
+    }
+
+    public function setNewPassword(string $newPassword): void
+    {
+        $this->newPassword = $newPassword;
+    }
+
+    public function getNewRetypedPassword(): string
+    {
+        return $this->newRetypedPassword;
+    }
+
+    public function setNewRetypedPassword(string $newRetypedPassword): void
+    {
+        $this->newRetypedPassword = $newRetypedPassword;
+    }
+
+    public function getOldPassword(): string
+    {
+        return $this->oldPassword;
+    }
+
+    public function setOldPassword(string $oldPassword): void
+    {
+        $this->oldPassword = $oldPassword;
     }
 
     public function getName(): ?string
@@ -253,5 +332,15 @@ class User implements UserInterface
     public function setRetypedPassword(string $retypedPassword): void
     {
         $this->retypedPassword = $retypedPassword;
+    }
+
+    public function getPasswordChangeDate(): ?int
+    {
+        return $this->passwordChangeDate;
+    }
+
+    public function setPasswordChangeDate(int $passwordChangeDate): void
+    {
+        $this->passwordChangeDate = $passwordChangeDate;
     }
 }
